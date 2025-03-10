@@ -9,39 +9,66 @@ body {
 }
 
 .no-display {
-  display: none;
+  display: none !important;
 }
 
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-10px);
+  }
+}
 .topmenu {
   display: flex;
   justify-content: space-around;
   height: 10%;
+  border-radius: 20px;
+  border: 5px solid #272626;
+  background: linear-gradient(to right, #272626, #5b5858);
 }
 .topmenu_menu {
-  position: relative;
-  height: 2em;
-  width: 2em;
-  top: 15%;
-  left: 5%;
-  margin: 5px;
+  position: absolute;
+  height: 40px;
+  width: 40px;
+  top: 3px;
+  left: 10px;
+  margin: 10px;
+  border-radius: 50px;
+  padding: 5px;
+  border: 1px solid #f5eeee;
 }
 .topmenu__btn {
-  height: 50%;
+  height: 30px;
+  width: 45px;
   margin: auto;
+  border-radius: 30px;
 }
 .topmenu_logo {
   margin: 10px;
+  height: 40px;
+  width: 40px;
 }
 .topmenu_menu-logo {
   display: flex;
   justify-content: left;
 }
 .topmenu_keep {
-  height: 100%;
+  height: 40px;
+  width: 40px;
   font-size: 1.5rem;
   font-weight: 500;
   position: relative;
   top: 25%;
+  color: #f1e5e5;
+  text-shadow: 0px 4px 10px rgba(255, 255, 255, 0.5);
+  display: inline-block;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+.topmenu_keep:hover {
+  animation: bounce 0.6s ease infinite alternate;
+  opacity: 0.8;
 }
 .topmenu_searchbar {
   width: auto;
@@ -56,6 +83,18 @@ body {
   background: url("https://cdn-icons-png.flaticon.com/512/482/482631.png") no-repeat 10px center;
   background-size: 16px;
   padding: 10px 50px;
+  box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3);
+}
+.topmenu_bar:hover {
+  border: 2px solid #f5eeee;
+  height: 70%;
+  margin: auto;
+}
+.topmenu_bar::-moz-placeholder {
+  color: #f1e5e5;
+}
+.topmenu_bar::placeholder {
+  color: #f1e5e5;
 }
 .topmenu_optn {
   padding: 3px;
@@ -73,9 +112,10 @@ body {
 .leftmenu {
   margin: 0;
   left: 0;
-  height: 89vh;
-  width: 10%;
-  background-color: #a59f9f;
+  width: 15%;
+  background-color: #272626;
+  border: 2px solid #f5eeee;
+  border-radius: 5px;
   display: flex;
   flex-direction: column;
 }
@@ -83,18 +123,24 @@ body {
   display: block;
   margin: 10px;
   padding: 7px 10px;
-  border-radius: 50px;
   border: 0;
   font-size: 0.7em;
+  color: #f1e5e5;
+  background-color: #515050;
+  transition: all 0.11s ease-in-out;
+}
+.leftmenu__optn:hover {
+  color: #5f83e7;
+  border-radius: 30px;
+  text-shadow: 0px 4px 10px rgba(255, 255, 255, 0.5);
 }
 
 .notes {
   flex: 1;
+  background-color: #272626;
 }
 .notes__create {
   height: 15vh;
-  margin: 1% 3%;
-  padding: 5% auto;
 }
 .notes__create-bar {
   position: relative;
@@ -102,17 +148,32 @@ body {
   left: 25%;
   width: 50%;
   padding: 8px;
-  border-radius: 5px;
-  border: 0.5px solid black;
+  border-radius: 30px;
+  border: 0.5px solid #f5eeee;
   background: url("https://static.vecteezy.com/system/resources/previews/000/357/052/original/vector-notes-icon.jpg") no-repeat 15px center;
   background-size: 16px;
   padding: 10px 50px;
+  background-color: #515050;
+  box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3);
+}
+.notes__create-bar:hover {
+  width: 60%;
+  height: 50%;
+}
+.notes__create-bar ::-moz-placeholder {
+  color: #f1e5e5;
+}
+.notes__create-bar ::placeholder {
+  color: #f1e5e5;
 }
 .notes__title {
   margin-left: 10px;
   margin-top: 2rem;
   font-weight: 800;
-  font-size: 1.2rem;
+  font-size: 1.7rem;
+  color: #5f83e7;
+  margin-bottom: 2%;
+  text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.3);
 }
 .notes__pinned {
   margin: 1% 0 1% 0;
@@ -201,11 +262,13 @@ body {
 }
 
 .note {
-  height: auto;
-  max-height: 10rem;
-  width: 10rem;
-  max-width: 12rem;
+  height: 200px;
+  max-height: auto;
+  width: 244px;
+  max-width: 300px;
+  background-color: #515050;
   border: 1px solid #ada7a7;
+  border-radius: 20px;
   margin: 10px;
   word-wrap: break-word;
 }
@@ -213,45 +276,62 @@ body {
   height: 80%;
 }
 .note__title {
-  font-size: 1.2em;
+  font-size: 1.4em;
   font-weight: 800;
   padding: 0;
   text-align: center;
   width: 100%;
-  height: 20%;
+  min-height: 20%;
+  height: auto;
   text-align: center;
-  border-bottom: 1px solid #ada7a7;
   position: relative;
+  color: #5f83e7;
+  word-wrap: break-word;
 }
 .note__text {
   padding: 5px;
   width: 100%;
-  height: 80%;
-  border-bottom: 1px solid #ada7a7;
+  min-height: 80%;
+  height: auto;
+  word-wrap: break-word;
 }
 .note__optn {
   width: 100%;
-  height: 20%;
+  height: 30px;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   flex-direction: row;
   align-items: flex-start;
 }
 .note__btn {
-  width: auto;
-  height: 100%;
+  width: 30px;
+  height: 30px;
+  border-radius: 20px;
+  position: relative;
+  top: 10px;
 }
 .note__btn--pin {
   margin: 0;
-  height: 27px;
+  height: 31px;
   position: absolute;
-  right: 0;
+  right: 2px;
+  border-radius: 20px;
 }
 .note__icon {
   height: 100%;
+  border-radius: 10px;
 }
 .note__icon--pin {
   height: 100%;
   width: 100%;
   padding: 0;
+}
+
+.draggable {
+  border: 1px solid #f5eeee;
+  cursor: move;
+}
+
+.draggable.dragging {
+  opacity: 0.5;
 }/*# sourceMappingURL=style.css.map */

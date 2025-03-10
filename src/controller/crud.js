@@ -13,18 +13,13 @@ function closePopup() {
     popupContainer.style.display = "none";
     popupOverlay.style.display = "none";
 }
-
-
-
 export async function createNoteButton(event) {
-
     console.log("Create Button clicked");
     const title = document.getElementById('notetitle').value.trim();
     document.getElementById('notetitle').value = '';
     const description = document.getElementById('notedescription').value.trim();
     document.getElementById('notedescription').value = '';
     console.log(`response got ....${title}...${description}`);
-
     if (title == '' && description == '') {
         alert('! Alteast give either Title and Description');
         return;
@@ -39,8 +34,6 @@ export async function doRefresh() {
     if (document.querySelector('.notes__title--pinned')) {
         document.querySelector('.notes__title--pinned').classList.add('no-display');
     }
-
-    // document.querySelector('.notes__title--pinned').style.display='none';
     if (document.querySelector('notes__title')) {
         document.querySelector('notes__title').classList.add('no-display');
     }
@@ -50,22 +43,11 @@ export async function doRefresh() {
     await renderNotes()
     document.querySelector('.topmenu_bar').value = '';
 }
-
-
 export async function renderNotes() {
-    // if(navigator.onLine){
-    //     console.log('note get from ');
-    //     const allNotes = await Server.getFromServer();
-    // }
-    // else{
-    //     const allNotes = Server.getOfflineNotes();
-    // }
     console.log('notes from server');
     try {
         const parentLayout = document.querySelector('.notes__layout');
         const parentPin = document.querySelector('.notes__pinned');
-        // document.querySelector('.notes__title--pinned').style.display='none';
-        // document.querySelector('.notes__title').style.display='none';
         const allNotes = await Server.getFromServer();
         console.log("Fetched Notes from server:", allNotes);
 
@@ -77,6 +59,8 @@ export async function renderNotes() {
             if (note.isDeleted === false) {
                 const noteDiv = document.createElement('div');
                 noteDiv.classList.add('note');
+                noteDiv.classList.add('draggable');
+                noteDiv.setAttribute('draggable', 'true');
                 noteDiv.setAttribute('id', note.id); // Assign note ID
 
                 // Content Container
@@ -193,11 +177,86 @@ export async function renderNotes() {
                 await deleteNoteButton(event);
             }
         });
-
+        dragAndDrop();
     } catch (error) {
         console.error('Error fetching notes:', error);
     }
 }
+export function dragAndDrop() {
+    const draggables = document.querySelectorAll(".draggable");
+    const layoutContainer = document.querySelector(".notes__layout");
+    const pinnedContainer = document.querySelector(".notes__pinned");
+
+    draggables.forEach((draggable) => {
+        let originalContainer = null;
+        let originalNextSibling = null;
+
+        draggable.addEventListener("dragstart", () => {
+            draggable.classList.add("dragging");
+            originalContainer = draggable.parentElement;
+            originalNextSibling = draggable.nextSibling;
+        });
+
+        draggable.addEventListener("dragend", () => {
+            draggable.classList.remove("dragging");
+
+            if (draggable.parentElement !== originalContainer) {
+                if (originalNextSibling) {
+                    originalContainer.insertBefore(draggable, originalNextSibling);
+                } else {
+                    originalContainer.appendChild(draggable);
+                }
+            }
+        });
+    });
+
+    [layoutContainer, pinnedContainer].forEach((container) => {
+        container.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            const draggable = document.querySelector(".dragging");
+
+            if (draggable && container === draggable.parentElement) {
+                const afterElement = getDragAfterElement(container, e.clientX, e.clientY);
+                if (afterElement == null) {
+                    container.appendChild(draggable);
+                } else {
+                    container.insertBefore(draggable, afterElement);
+                }
+            }
+        });
+    });
+
+    function getDragAfterElement(container, x, y) {
+        const draggableElements = [...container.querySelectorAll(".draggable:not(.dragging)")];
+
+        return draggableElements.reduce(
+            (closest, child, index) => {
+                const box = child.getBoundingClientRect();
+                const nextBox = draggableElements[index + 1] && draggableElements[index + 1].getBoundingClientRect();
+                const inRow = y - box.bottom <= 0 && y - box.top >= 0;
+                const offset = x - (box.left + box.width / 2);
+                if (inRow) {
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset, element: child };
+                    } else {
+                        if (
+                            nextBox &&
+                            y - nextBox.top <= 0 &&
+                            closest.offset === Number.NEGATIVE_INFINITY
+                        ) {
+                            return { offset: 0, element: draggableElements[index + 1] };
+                        }
+                        return closest;
+                    }
+                } else {
+                    return closest;
+                }
+            },
+            { offset: Number.NEGATIVE_INFINITY }
+        ).element;
+    }
+}
+
 async function callingPin(noteId) {
     //fetching here
     const noteDetail = await Server.fetchNote(noteId);
@@ -211,17 +270,13 @@ async function callingPin(noteId) {
             if (pinnedContainer.childElementCount == 0) {
                 document.querySelector('.notes__title').classList.remove('no-display');
                 document.querySelector('.notes__title--pinned').classList.remove('no-display');
-
-                // document.querySelector('.notes__title').style.display = 'block';
-                // document.querySelector('.notes__title--pinned').style.display = 'block';
             }
             if (layoutContainer.childElementCount == 1) {
-                // document.querySelector('.notes__title').classList.add('no-display');
-                // console.log("hii")
                 document.querySelector('.notes__title').classList.add('no-display');
                 document.querySelector('.notes__title--pinned').classList.remove('no-display');
             }
             Server.patchToServer(noteId, { 'isPinned': true });
+            document.querySelector('.notes__pinned').classList.remove('no-display');
             pinnedContainer.appendChild(noteToBePinned);
         } else {
             alert("Element not found!");
@@ -231,13 +286,13 @@ async function callingPin(noteId) {
         if (noteToBePinned && pinnedContainer && layoutContainer) {
             if (layoutContainer.childElementCount == 0) {
                 document.querySelector('.notes__title').classList.remove('no-display');
-                // document.querySelector('.notes__title--pinned').style.display = 'block';
             }
             if (pinnedContainer.childElementCount == 1) {
                 document.querySelector('.notes__title--pinned').classList.add('no-display');
                 document.querySelector('.notes__title').classList.add('no-display');
             }
             Server.patchToServer(noteId, { 'isPinned': false });
+            document.querySelector('.notes__layout').classList.remove('no-display');
             layoutContainer.appendChild(noteToBePinned);
         } else {
             alert("Element not found!");
@@ -269,50 +324,11 @@ export async function editNoteButton(event) {
         alert('At least provide either Title or Description!');
         return;
     }
-
     const noteId = event.target.closest('.popup').getAttribute('data-id');
-    await Server.patchToServer(noteId,{ 'id': noteId, 'title': title, 'text': description});
-
+    await Server.patchToServer(noteId, { 'id': noteId, 'title': title, 'text': description });
     await renderNotes();
     closePopup();
 }
-
-
-
-// export async function deleteNoteButton(event) {
-//     const deleteBtn = event.target.closest('.note__delete-btn');
-//     if (!deleteBtn) return;
-
-//     const noteId = deleteBtn.getAttribute('data-id');
-//     console.log(`Going to delete id: ${noteId}`);
-
-//     if (!noteId) {
-//         console.error("Error: noteId is missing!");
-//         return;
-//     }
-
-//     const noteElement = document.getElementById(noteId);
-//     if (!noteElement) {
-//         console.error("Error: Note element not found!");
-//         return;
-//     }
-
-//     const title = noteElement.querySelector('.note__title').textContent;
-//     const text = noteElement.querySelector('.note__text').textContent;
-
-//     try {
-//         // Ensure `addToTrash` runs only once
-//         await Server.addToTrash({ title, text, isPinned: false });
-
-//         // Delete note from server
-//         await Server.deleteFromServer(noteId);
-
-//         await renderNotes();
-//     } catch (error) {
-//         console.error("Error in deleteNoteButton:", error);
-//     }
-// }
-
 
 export async function deleteNoteButton(event) {
     event.stopPropagation();
@@ -337,12 +353,10 @@ export async function deleteNoteButton(event) {
     }
     console.log(`Going to delete id: ${noteId}`);
     try {
-        // await Server.addToTrash({'title':title, 'text':text, 'isPinned':false });
-        Server.patchToServer(noteId,{  'id': noteId,'title': title, 'text': text, 'isPinned': false, 'isDeleted': true });
+        Server.patchToServer(noteId, { 'id': noteId, 'title': title, 'text': text, 'isPinned': false, 'isDeleted': true });
         const resp = await Server.getFromServer();
         console.log("trash notes after click from notes layout:")
         console.log(resp);
-        // await Server.deleteFromServer(noteId);
         await renderNotes();
     } catch (error) {
         console.error("Error in deleteNoteButton:", error);
@@ -350,9 +364,6 @@ export async function deleteNoteButton(event) {
         delete event.target.dataset.processing;
     }
 }
-
-
-
 function callingView(noteId) {      //function name
     const noteElement = document.getElementById(noteId);
     const popupContainer = document.getElementById("popupContainer-edit");
@@ -381,13 +392,3 @@ function callingView(noteId) {      //function name
         document.getElementById('editNoteButton').style.display = "block";
     });
 }
-
-
-
-
-
-
-
-
-
-

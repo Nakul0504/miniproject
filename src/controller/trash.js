@@ -1,6 +1,5 @@
 import * as Server from '../model/crud';
 export async function initialize() {
-
     await renderTrashNotes();
 }
 async function renderTrashNotes() {
@@ -13,7 +12,6 @@ async function renderTrashNotes() {
         parent.innerHTML = '';
 
         allNotes.forEach(note => {
-            // Create Note Container
             if (note.isDeleted === true) {
                 console.log("######");
                 const noteDiv = document.createElement('div');
@@ -58,6 +56,24 @@ async function renderTrashNotes() {
 
                 deleteBtn.appendChild(deleteIcon);
 
+                //undo button
+                const undoBtn = document.createElement('button');
+                // deleteBtn.classList.add('note__btn');
+                undoBtn.setAttribute('data-id', note.id);
+                undoBtn.setAttribute('title', 'restore note');
+                undoBtn.classList.add('note__btn', 'note__restore-btn');
+
+
+                // Undo Icon
+                const undoIcon = document.createElement('img');
+                undoIcon.setAttribute('class', 'note__icon');
+                undoIcon.setAttribute('src', 'https://img.icons8.com/?size=100&id=91644&format=png&color=000000');
+                undoIcon.setAttribute('alt', 'Restore');
+
+                undoBtn.appendChild(undoIcon);
+                undoBtn.onclick = () => callingRestore(note.id,note.title);
+                undoBtn.appendChild(undoIcon);
+
                 //view Button
                 const viewBtn = document.createElement('button');
                 viewBtn.classList.add('note__btn');
@@ -74,6 +90,7 @@ async function renderTrashNotes() {
                 optnDiv.style.display='flex';
                 optnDiv.appendChild(deleteBtn);
                 optnDiv.appendChild(viewBtn);
+                optnDiv.appendChild(undoBtn);
 
                 noteDiv.appendChild(optnDiv);
                 parent.appendChild(noteDiv);
@@ -113,7 +130,7 @@ export async function deleteNoteButton(event) {
     // await Server.addToTrash({ 'title': title, 'text': text, 'isPinned': false });
     // await Server.addToTrash(noteId);
 
-    await renderNotes();
+    await renderTrashNotes();
 }
 
 function callingView(noteId) {      //function name
@@ -145,3 +162,13 @@ function callingView(noteId) {      //function name
     });
 }
 
+function callingRestore(noteId,title){
+    const element= document.getElementById(noteId);
+    var retVal = confirm(`Do you want to restore ${title} ?`);
+    if (retVal == true) {
+        document.querySelector('.notes__layout').appendChild(element);
+        Server.patchToServer(noteId,{'isDeleted':false});
+    } else {
+        return;
+    }
+}
