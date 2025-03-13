@@ -4,73 +4,69 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>G-Keep</title>
-
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script> -->
-
-    <link rel="stylesheet" href="./src/style.css" />
+    <link rel="stylesheet" href="./src/styles/style.css" />
+    <link rel="stylesheet" href="./src/styles/noteStyle.css" />
     <link href="https://fonts.cdnfonts.com/css/product-sans" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <header class="topmenu">
-      <div class="topmenu_menu-logo">
-        <img
-          class="topmenu_menu"
-          src="https://img.icons8.com/?size=100&id=Rdp3AydLFY2A&format=png&color=000000"
+      <div class="topmenu__menu-logo">
+        <i
+          class="fa fa-bars topmenu__menu"
           alt="mainmenu"
           title="mainmenu"
-        />
+          aria-hidden="true"
+        ></i>
         <img
-          class="topmenu_logo"
+          class="topmenu__logo"
           src="./src/images/gkeep_logo.png"
           alt="logo"
           title="Google Keep Logo"
         />
-        <div class="topmenu_keep">Keep</div>
+        <div class="topmenu__keep">Keep</div>
       </div>
 
-      <div class="topmenu_searchbar">
+      <div class="topmenu__searchbar">
         <input
-          id="topmenu_bar"
-          class="topmenu_bar"
+          id="topmenu__bar"
+          class="topmenu__bar"
           type="text"
           placeholder="Search"
         />
-        <button class="topmenu__btn" id="refresh">
-          <img
-            class="topmenu_optn topmenu_optn--refresh"
-            src="./src/images/black_refresh_sym.png"
-            alt="refresh option"
-            title="refresh"
-          />
+        <button
+          class="topmenu__btn"
+          id="refresh"
+          alt="refresh option"
+          title="refresh"
+        >
+          <i
+            class="fa fa-refresh topmenu_optn topmenu__optn--refresh"
+            aria-hidden="true"
+          ></i>
         </button>
-        <img
-          class="topmenu_optn"
-          src="./src/images/listview_symbol.svg"
+        <i
+          class="fa fa-list topmenu__optn"
+          aria-hidden="true"
           alt="list view option"
           title="list view"
-        />
+        ></i>
       </div>
     </header>
     <hr />
 
     <div class="content">
       <aside class="leftmenu">
-        <button
-          class="leftmenu__optn"
-          data-path="./src/view/notes-section.html"
-          id="notes-section"
-        >
-          Notes Section
-        </button>
-        <button
-          class="leftmenu__optn"
-          data-path="./src/view/trash-section.html"
-          id="trash-section"
-        >
-          Trash Section
-        </button>
-        <!-- <a class="leftmenu__optn" href="./index.html">Notes Section</a>
-        <a class="leftmenu__optn" href="./src/view/trash-section.html">Trash Section</a> -->
+        <!--The <aside> content is placed as a sidebar in a document.-->
+        <button class="leftmenu__optn" id="notes-section">Notes Section</button>
+        <button class="leftmenu__optn" id="trash-section">Trash Section</button>
       </aside>
       <section class="notes">
         <div class="notes__create">
@@ -91,9 +87,9 @@
       </section>
     </div>
 
-    <div id="popupOverlay" class="popup-overlay"></div>
+    <div id="popupOverlay" class="popup-overlay hide"></div>
     <!-- Popup Message -->
-    <div id="popupContainer" class="popup">
+    <div id="popupContainer" class="popup hide">
       <span class="close-btn">&times;</span>
       <div class="popup__inner">
         <input
@@ -104,18 +100,23 @@
           title="Enter title"
         />
       </div>
-      <div class="popup__inner">
-        <!-- <textarea id="notedescription" class="popup__input" rows="7" cols="60" placeholder="Description" title="Enter description"></textarea> -->
-        <input
+      <div class="popup__inner--descrp">
+        <!-- <input
           id="notedescription"
           class="popup__input--descrp"
           type="text"
           placeholder="Enter note here..."
           title="Enter title"
-        />
+        /> -->
+        <textarea
+          id="notedescription"
+          class="popup__input--descrp"
+          placeholder="Enter note here..."
+          title="Enter description"
+        ></textarea>
       </div>
       <div class="popup__inner popup__inner--button">
-        <button id="createNoteButton">
+        <button class="popup__btn" id="createNoteButton">
           <img
             class="popup__create"
             src="https://th.bing.com/th/id/OIP.8lqMi2Rh8T3Ci55WoGF2PwHaF8?rs=1&pid=ImgDetMain"
@@ -125,7 +126,8 @@
         </button>
       </div>
     </div>
-    <div id="popupContainer-edit" class="popup" style="display: none">
+
+    <div id="popupContainer-edit" class="popup hide">
       <span class="close-btn">&times;</span>
       <div class="popup__inner">
         <input
@@ -136,17 +138,16 @@
         />
       </div>
       <div class="popup__inner">
-        <input type="text" id="notedescription-edit" class="popup__input" title="description" >
-        <!-- <textarea
+        <!-- <input
+          type="text"
           id="notedescription-edit"
-          class="popup__input"
-          rows="7"
-          cols="60"
+          class="popup__edit--descrp"
           title="description"
-        ></textarea> -->
+        /> -->
+        <div id="notedescription-edit" class="popup__edit--descrp"></div>
       </div>
       <div class="popup__inner popup__inner--button">
-        <button id="editNoteButton">
+        <button class="popup__btn" id="editNoteButton">
           <img
             class="popup__create"
             src="https://th.bing.com/th/id/OIP.8lqMi2Rh8T3Ci55WoGF2PwHaF8?rs=1&pid=ImgDetMain"
@@ -157,7 +158,12 @@
       </div>
     </div>
 
-    
+    <!-- Loading Spinner -->
+    <div id="spinner-overlay" class="spinner-overlay" style="display: none">
+      <div class="spinner"></div>
+    </div>
+
     <script type="module" src="/src/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
   </body>
 </html>

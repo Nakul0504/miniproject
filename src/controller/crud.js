@@ -1,65 +1,83 @@
-import * as Server from '../model/crud';
+import { addToServer, getFromServer, fetchNote, patchToServer } from '../model/serverInterface';
+import { quillInstance } from '../index'
+
+// DOM element selectors
+const popupContainer = document.getElementById('popupContainer');
+const popupOverlay = document.getElementById('popupOverlay');
+const closeBtn = document.querySelector('.close-btn');
+const noteTitle = document.getElementById('notetitle');
+const notedescrp = document.getElementById('notedescription');
+const editPoppup = document.getElementById('popupContainer-edit');
+const notesTitlePinned = document.querySelector('.notes__title--pinned');
+const notesTitle = document.querySelector('.notes__title');
+const notesLayout = document.querySelector('.notes__layout');
+const notesPinned = document.querySelector('.notes__pinned');
+const topMenuBar = document.querySelector('.topmenu__bar');
+const notesContainer = document.querySelector('.notes');
 
 export function createNote(event) {
-    const popupContainer = document.getElementById("popupContainer");
-    const popupOverlay = document.getElementById("popupOverlay");
-    const closeBtn = document.querySelector(".close-btn");
-    popupContainer.style.display = "block";
-    popupOverlay.style.display = "block";
-    closeBtn.addEventListener("click", closePopup);
-    popupOverlay.addEventListener("click", closePopup);
+    popupContainer.classList.remove('hide');
+    popupOverlay.classList.remove('hide');
+    closeBtn.addEventListener('click', closePopup);
+    popupOverlay.addEventListener('click', closePopup);
 }
 function closePopup() {
-    popupContainer.style.display = "none";
-    popupOverlay.style.display = "none";
+    popupContainer.classList.add('hide');
+    popupOverlay.classList.add('hide');
+    noteTitle.value = '';
+    notedescrp.value = '';
+    editPoppup.classList.add('hide');
 }
 export async function createNoteButton(event) {
-    console.log("Create Button clicked");
-    const title = document.getElementById('notetitle').value.trim();
-    document.getElementById('notetitle').value = '';
-    const description = document.getElementById('notedescription').value.trim();
-    document.getElementById('notedescription').value = '';
-    console.log(`response got ....${title}...${description}`);
-    if (title == '' && description == '') {
-        alert('! Alteast give either Title and Description');
-        return;
+    try {
+        const title = noteTitle.value.trim();
+        noteTitle.value = '';
+        const description = notedescrp.value.trim();
+        notedescrp.value = '';
+
+        if (title === '' && description === '') {
+            alert('! At least provide either Title or Description');
+            return;
+        }
+        await addToServer({
+            title,
+            text: description,
+            isPinned: false,
+            isDeleted: false
+        });
+        await renderNotes();
+        closePopup();
+
+    } catch (error) {
+        console.error('Error in createNoteButton:', error);
+        alert('An error occurred while creating the note. Please try again.');
     }
-    console.log('calling server');
-    await Server.addToServer({ 'title': title, 'text': description, 'isPinned': false, 'isDeleted': false });
-    console.log('calling render notes');
-    await renderNotes();
-    closePopup();
 }
+
 export async function doRefresh() {
-    if (document.querySelector('.notes__title--pinned')) {
-        document.querySelector('.notes__title--pinned').classList.add('no-display');
+    if (notesTitlePinned) {
+        notesTitlePinned.classList.add('hide');
     }
-    if (document.querySelector('notes__title')) {
-        document.querySelector('notes__title').classList.add('no-display');
+    if (notesTitle) {
+        notesTitle.classList.add('hide');
     }
 
-    document.querySelector('.notes__layout').innerHTML = '';
-    document.querySelector('.notes__pinned').innerHTML = '';
-    await renderNotes()
-    document.querySelector('.topmenu_bar').value = '';
+    notesLayout.innerHTML = '';
+    notesPinned.innerHTML = '';
+    await renderNotes();
+    topMenuBar.value = '';
 }
 export async function renderNotes() {
-    console.log('notes from server');
     try {
-        const parentLayout = document.querySelector('.notes__layout');
-        const parentPin = document.querySelector('.notes__pinned');
-        const allNotes = await Server.getFromServer();
-        console.log("Fetched Notes from server:", allNotes);
-
-        parentLayout.innerHTML = '';
-        parentPin.innerHTML = '';
+        const allNotes = await getFromServer();
+        notesLayout.innerHTML = '';
+        notesPinned.innerHTML = '';
 
         allNotes.forEach(note => {
             // Create Note Container
             if (note.isDeleted === false) {
                 const noteDiv = document.createElement('div');
-                noteDiv.classList.add('note');
-                noteDiv.classList.add('draggable');
+                noteDiv.classList.add('note', 'draggable');
                 noteDiv.setAttribute('draggable', 'true');
                 noteDiv.setAttribute('id', note.id); // Assign note ID
 
@@ -71,28 +89,28 @@ export async function renderNotes() {
                 const titleDiv = document.createElement('div');
                 titleDiv.classList.add('note__title');
                 titleDiv.textContent = note.title;
-                //pin button
+
+                // Pin button
                 const pinBtn = document.createElement('button');
                 pinBtn.classList.add('note__btn--pin');
                 pinBtn.setAttribute('data-id', note.id);
                 pinBtn.setAttribute('title', 'Pin note');
 
-                // pin Icon
-                const pinIcon = document.createElement('img');
-                pinIcon.setAttribute('class', 'note__icon--pin');
-                pinIcon.setAttribute('src', 'https://cdn2.iconfinder.com/data/icons/stationery-101/64/pin_mark_point_tack_office-512.png');
+                // Pin Icon
+                const pinIcon = document.createElement('i');
+                pinIcon.classList.add('fa', 'fa-thumb-tack');
+                pinIcon.setAttribute('aria-hidden', 'true');
                 pinIcon.setAttribute('alt', 'Pin');
                 pinBtn.appendChild(pinIcon);
                 pinBtn.onclick = () => callingPin(note.id);
-                titleDiv.appendChild(pinBtn)
+                titleDiv.appendChild(pinBtn);
                 noteContent.appendChild(titleDiv);
 
                 // Text
                 const textDiv = document.createElement('div');
                 textDiv.classList.add('note__text');
-                textDiv.textContent = note.text;
+                textDiv.innerHTML = note.text;
                 noteContent.appendChild(textDiv);
-
                 noteDiv.appendChild(noteContent);
 
                 // Options Container
@@ -101,46 +119,28 @@ export async function renderNotes() {
 
                 // Delete Button
                 const deleteBtn = document.createElement('button');
-                // deleteBtn.classList.add('note__btn');
                 deleteBtn.setAttribute('data-id', note.id);
                 deleteBtn.setAttribute('title', 'Delete note');
                 deleteBtn.classList.add('note__btn', 'note__delete-btn');
+                deleteBtn.innerHTML = '<i class="fa fa-trash" aria-hidden="true"></i>';
 
-
-                // Delete Icon
-                const deleteIcon = document.createElement('img');
-                deleteIcon.setAttribute('class', 'note__icon');
-                deleteIcon.setAttribute('src', 'https://th.bing.com/th/id/OIP.9CtMaGywq5uFGv1C6P6k1wHaHa?rs=1&pid=ImgDetMain');
-                deleteIcon.setAttribute('alt', 'Delete');
-
-                deleteBtn.appendChild(deleteIcon);
-
-                // Edit Button
                 const editBtn = document.createElement('button');
                 editBtn.classList.add('note__btn');
                 editBtn.setAttribute('data-id', note.id);
                 editBtn.setAttribute('title', 'Edit note');
 
                 // Edit Icon
-                const editIcon = document.createElement('img');
-                editIcon.setAttribute('class', 'note__icon');
-                editIcon.setAttribute('src', 'https://th.bing.com/th/id/OIP.LEK7h-h95VZW5qrFh04JMgHaHa?rs=1&pid=ImgDetMain');
-                editIcon.setAttribute('alt', 'Edit');
-                editBtn.appendChild(editIcon);
+                editBtn.innerHTML = '<i class="fa fa-pencil" aria-hidden="true"></i>';
                 editBtn.onclick = () => callingEdit(note.id);
 
-                //view Button
+                // View Button
                 const viewBtn = document.createElement('button');
                 viewBtn.classList.add('note__btn');
                 viewBtn.setAttribute('data-id', note.id);
                 viewBtn.setAttribute('title', 'View note');
 
                 // View Icon
-                const viewIcon = document.createElement('img');
-                viewIcon.setAttribute('class', 'note__icon');
-                viewIcon.setAttribute('src', 'https://icon-library.com/images/full-screen-icon-png/full-screen-icon-png-17.jpg');
-                viewIcon.setAttribute('alt', 'View');
-                viewBtn.appendChild(viewIcon);
+                viewBtn.innerHTML = '<i class="fa fa-expand" aria-hidden="true"></i>';
                 viewBtn.onclick = () => callingView(note.id);
 
                 optnDiv.appendChild(deleteBtn);
@@ -149,30 +149,26 @@ export async function renderNotes() {
 
                 noteDiv.appendChild(optnDiv);
                 if (note.isPinned === false) {
-                    parentLayout.appendChild(noteDiv);
-                }
-                else {
-                    parentPin.appendChild(noteDiv);
+                    notesLayout.appendChild(noteDiv);
+                } else {
+                    notesPinned.appendChild(noteDiv);
                 }
             }
-
-
         });
 
-
-        if ((parentLayout.childElementCount != 0) && (parentPin.childElementCount != 0)) {
-            document.querySelector('.notes__title--pinned').classList.remove('no-display');
-            document.querySelector('.notes__title').classList.remove('no-display');
+        if ((notesLayout.childElementCount != 0) && (notesPinned.childElementCount != 0)) {
+            notesTitlePinned.classList.remove('hide');
+            notesTitle.classList.remove('hide');
         }
-        if ((parentLayout.childElementCount != 0) && (parentPin.childElementCount == 0)) {
-            document.querySelector('.notes__title--pinned').classList.add('no-display');
-            document.querySelector('.notes__title').classList.add('no-display');
+        if ((notesLayout.childElementCount != 0) && (notesPinned.childElementCount == 0)) {
+            notesTitlePinned.classList.add('hide');
+            notesTitle.classList.add('hide');
         }
-        if ((parentLayout.childElementCount == 0) && (parentPin.childElementCount != 0)) {
-            document.querySelector('.notes__title--pinned').classList.remove('no-display');
-            document.querySelector('.notes__title').classList.add('no-display');
+        if ((notesLayout.childElementCount == 0) && (notesPinned.childElementCount != 0)) {
+            notesTitlePinned.classList.remove('hide');
+            notesTitle.classList.add('hide');
         }
-        document.querySelector('.notes__layout').addEventListener('click', async (event) => {
+        notesContainer.addEventListener('click', async (event) => {
             if (event.target.closest('.note__delete-btn')) {
                 await deleteNoteButton(event);
             }
@@ -182,23 +178,25 @@ export async function renderNotes() {
         console.error('Error fetching notes:', error);
     }
 }
+
+
 export function dragAndDrop() {
-    const draggables = document.querySelectorAll(".draggable");
-    const layoutContainer = document.querySelector(".notes__layout");
-    const pinnedContainer = document.querySelector(".notes__pinned");
+    const draggables = document.querySelectorAll('.draggable');
+    const layoutContainer = document.querySelector('.notes__layout');
+    const pinnedContainer = document.querySelector('.notes__pinned');
 
     draggables.forEach((draggable) => {
         let originalContainer = null;
         let originalNextSibling = null;
 
-        draggable.addEventListener("dragstart", () => {
-            draggable.classList.add("dragging");
+        draggable.addEventListener('dragstart', () => {
+            draggable.classList.add('dragging');
             originalContainer = draggable.parentElement;
             originalNextSibling = draggable.nextSibling;
         });
 
-        draggable.addEventListener("dragend", () => {
-            draggable.classList.remove("dragging");
+        draggable.addEventListener('dragend', () => {
+            draggable.classList.remove('dragging');
 
             if (draggable.parentElement !== originalContainer) {
                 if (originalNextSibling) {
@@ -211,9 +209,9 @@ export function dragAndDrop() {
     });
 
     [layoutContainer, pinnedContainer].forEach((container) => {
-        container.addEventListener("dragover", (e) => {
+        container.addEventListener('dragover', (e) => {
             e.preventDefault();
-            const draggable = document.querySelector(".dragging");
+            const draggable = document.querySelector('.dragging');
 
             if (draggable && container === draggable.parentElement) {
                 const afterElement = getDragAfterElement(container, e.clientX, e.clientY);
@@ -227,7 +225,7 @@ export function dragAndDrop() {
     });
 
     function getDragAfterElement(container, x, y) {
-        const draggableElements = [...container.querySelectorAll(".draggable:not(.dragging)")];
+        const draggableElements = [...container.querySelectorAll('.draggable:not(.dragging)')];
 
         return draggableElements.reduce(
             (closest, child, index) => {
@@ -259,8 +257,7 @@ export function dragAndDrop() {
 
 async function callingPin(noteId) {
     //fetching here
-    const noteDetail = await Server.fetchNote(noteId);
-    console.log(noteDetail);
+    const noteDetail = await fetchNote(noteId);
     const noteToBePinned = document.getElementById(noteId);
     const pinnedContainer = document.querySelector('.notes__pinned');
     const layoutContainer = document.querySelector('.notes__layout');
@@ -268,64 +265,65 @@ async function callingPin(noteId) {
     if (noteDetail.isPinned === false) {
         if (noteToBePinned && pinnedContainer && layoutContainer) {
             if (pinnedContainer.childElementCount == 0) {
-                document.querySelector('.notes__title').classList.remove('no-display');
-                document.querySelector('.notes__title--pinned').classList.remove('no-display');
+                document.querySelector('.notes__title').classList.remove('hide');
+                document.querySelector('.notes__title--pinned').classList.remove('hide');
             }
             if (layoutContainer.childElementCount == 1) {
-                document.querySelector('.notes__title').classList.add('no-display');
-                document.querySelector('.notes__title--pinned').classList.remove('no-display');
+                document.querySelector('.notes__title').classList.add('hide');
+                document.querySelector('.notes__title--pinned').classList.remove('hide');
             }
-            Server.patchToServer(noteId, { 'isPinned': true });
-            document.querySelector('.notes__pinned').classList.remove('no-display');
+            patchToServer(noteId, { 'isPinned': true });
+            document.querySelector('.notes__pinned').classList.remove('hide');
             pinnedContainer.appendChild(noteToBePinned);
         } else {
-            alert("Element not found!");
+            alert('Element not found!');
         }
     }
     else {
         if (noteToBePinned && pinnedContainer && layoutContainer) {
             if (layoutContainer.childElementCount == 0) {
-                document.querySelector('.notes__title').classList.remove('no-display');
+                document.querySelector('.notes__title').classList.remove('hide');
             }
             if (pinnedContainer.childElementCount == 1) {
-                document.querySelector('.notes__title--pinned').classList.add('no-display');
-                document.querySelector('.notes__title').classList.add('no-display');
+                document.querySelector('.notes__title--pinned').classList.add('hide');
+                document.querySelector('.notes__title').classList.add('hide');
             }
-            Server.patchToServer(noteId, { 'isPinned': false });
-            document.querySelector('.notes__layout').classList.remove('no-display');
+            patchToServer(noteId, { 'isPinned': false });
+            document.querySelector('.notes__layout').classList.remove('hide');
             layoutContainer.appendChild(noteToBePinned);
         } else {
-            alert("Element not found!");
+            alert('Element not found!');
         }
     }
 
 }
 
-function callingEdit(noteId) {
+export function callingEdit(noteId) {
     const noteElement = document.getElementById(noteId);
     const popupContainer = document.getElementById("popupContainer-edit");
-    document.getElementById('notetitle-edit').value = noteElement.querySelector('.note__title').textContent;
-    document.getElementById('notedescription-edit').value = noteElement.querySelector('.note__text').textContent;
+    document.getElementById("notetitle-edit").value = noteElement.querySelector(".note__title").textContent;
+    const noteText = noteElement.querySelector(".note__text").innerHTML;
+    quillInstance.root.innerHTML = noteText;
     popupContainer.setAttribute("data-id", noteId);
-    popupContainer.style.display = "block";
+    popupContainer.classList.remove('hide');
     const closeBtn = popupContainer.querySelector(".close-btn");
-    closeBtn.addEventListener("click", () => {
-        popupContainer.style.display = "none";
-    });
-    document.getElementById('editNoteButton').addEventListener('click', editNoteButton);
+    closeBtn.onclick = () => {
+        popupContainer.classList.add('hide')
+    };
+    document.getElementById("editNoteButton").onclick = editNoteButton;
 }
 
 export async function editNoteButton(event) {
-    console.log("Edit Button clicked");
-    const title = document.getElementById('notetitle-edit').value.trim();
-    const description = document.getElementById('notedescription-edit').value.trim();
+    const title = document.getElementById("notetitle-edit").value.trim();
+    const description = quillInstance.root.innerHTML.trim();
 
-    if (title === '' && description === '') {
-        alert('At least provide either Title or Description!');
+    if (title === "" && description === "") {
+        alert("At least provide either Title or Description!");
         return;
     }
-    const noteId = event.target.closest('.popup').getAttribute('data-id');
-    await Server.patchToServer(noteId, { 'id': noteId, 'title': title, 'text': description });
+
+    const noteId = event.target.closest(".popup").getAttribute("data-id");
+    await patchToServer(noteId, { id: noteId, title: title, text: description });
     await renderNotes();
     closePopup();
 }
@@ -342,53 +340,39 @@ export async function deleteNoteButton(event) {
 
     const noteElement = document.getElementById(noteId);
     if (!noteElement) {
-        console.error("Error: Note element not found!");
+        console.error('Error: Note element not found!');
         return;
     }
-
     const title = noteElement.querySelector('.note__title').textContent;
     const text = noteElement.querySelector('.note__text').textContent;
     if (!confirm(`Are you sure to delete the Note with Title:${title} ?`)) {
         return;
     }
-    console.log(`Going to delete id: ${noteId}`);
     try {
-        Server.patchToServer(noteId, { 'id': noteId, 'title': title, 'text': text, 'isPinned': false, 'isDeleted': true });
-        const resp = await Server.getFromServer();
-        console.log("trash notes after click from notes layout:")
-        console.log(resp);
+        patchToServer(noteId, { 'id': noteId, 'title': title, 'text': text, 'isPinned': false, 'isDeleted': true });
+        const resp = await getFromServer();
         await renderNotes();
     } catch (error) {
-        console.error("Error in deleteNoteButton:", error);
+        console.error('Error in deleteNoteButton:', error);
     } finally {
         delete event.target.dataset.processing;
     }
 }
-function callingView(noteId) {      //function name
+function callingView(noteId) {
     const noteElement = document.getElementById(noteId);
-    const popupContainer = document.getElementById("popupContainer-edit");
-
-    // Set text field values
+    const popupContainer = editPoppup;
     document.getElementById('notetitle-edit').value = noteElement.querySelector('.note__title').textContent;
     document.getElementById('notedescription-edit').value = noteElement.querySelector('.note__text').textContent;
-
-    // Temporarily disable editing
-    document.getElementById('notetitle-edit').setAttribute("readonly", true);
-    document.getElementById('notedescription-edit').setAttribute("readonly", true);
-
-    // Hide the edit button
-    document.getElementById('editNoteButton').style.display = "none";
-
-    // Display the popup
-    popupContainer.setAttribute("data-id", noteId);
-    popupContainer.style.display = "block";
-
-    // Close button functionality
-    const closeBtn = popupContainer.querySelector(".close-btn");
-    closeBtn.addEventListener("click", () => {
-        popupContainer.style.display = "none";
-        document.getElementById('notetitle-edit').removeAttribute("readonly");
-        document.getElementById('notedescription-edit').removeAttribute("readonly");
-        document.getElementById('editNoteButton').style.display = "block";
+    document.getElementById('notetitle-edit').setAttribute('readonly', true);
+    document.getElementById('notedescription-edit').setAttribute('readonly', true);
+    document.getElementById('editNoteButton').classList.add('hide');
+    popupContainer.setAttribute('data-id', noteId);
+    popupContainer.classList.remove('hide');
+    const closeBtn = popupContainer.querySelector('.close-btn');
+    closeBtn.addEventListener('click', () => {
+        popupContainer.classList.add('hide');
+        document.getElementById('notetitle-edit').removeAttribute('readonly');
+        document.getElementById('notedescription-edit').removeAttribute('readonly');
+        document.getElementById('editNoteButton').classList.remove('hide');
     });
 }

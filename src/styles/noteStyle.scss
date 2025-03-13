@@ -1,0 +1,91 @@
+$secondary-dark-color: #515050;
+$notetitle-textSize: 1.4em;
+$primary-color: #5f83e7;
+$border: #f5eeee;
+
+.note {
+    min-height: 200px;
+    min-width: 244px;
+    max-width: 70%;
+    width: fit-content;
+    height: fit-content;
+    background-color: $secondary-dark-color;
+    border: 1px solid #ada7a7;
+    border-radius: 20px;
+    margin: 10px;
+    word-wrap: break-word;
+    position: relative;
+    overflow-wrap: break-word;
+    display: inline-block;
+
+    &__title {
+        font-size: $notetitle-textSize;
+        font-weight: 800;
+        padding: 0;
+        text-align: center;
+        width: 100%;
+        min-height: 20%;
+        height: auto;
+        text-align: center;
+        position: relative;
+        color: $primary-color;
+        word-wrap: break-word;
+    }
+
+    &__text {
+        padding: 5px;
+        width: 100%;
+        min-height: 80%;
+        word-wrap: break-word;
+    }
+
+    &__optn {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 30px;
+        display: flex;
+        justify-content: space-around;
+        flex-direction: row;
+        align-items: flex-start;
+
+    }
+
+    &__btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 20px;
+
+        &--pin {
+            margin: 0;
+            height: 31px;
+            position: absolute;
+            right: 2px;
+            border-radius: 20px;
+            padding: 7px;
+        }
+
+        position:relative;
+    }
+
+    &__icon {
+        height: 100%;
+        border-radius: 10px;
+
+        &--pin {
+            height: 100%;
+            width: 100%;
+            padding: 0;
+        }
+    }
+
+}
+
+.draggable {
+    border: 1px solid $border;
+    cursor: move;
+}
+
+.draggable.dragging {
+    opacity: 0.5;
+}

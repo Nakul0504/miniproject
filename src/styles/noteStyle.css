@@ -1,0 +1,78 @@
+.note {
+  min-height: 200px;
+  min-width: 244px;
+  max-width: 70%;
+  width: -moz-fit-content;
+  width: fit-content;
+  height: -moz-fit-content;
+  height: fit-content;
+  background-color: #515050;
+  border: 1px solid #ada7a7;
+  border-radius: 20px;
+  margin: 10px;
+  word-wrap: break-word;
+  position: relative;
+  overflow-wrap: break-word;
+  display: inline-block;
+}
+.note__title {
+  font-size: 1.4em;
+  font-weight: 800;
+  padding: 0;
+  text-align: center;
+  width: 100%;
+  min-height: 20%;
+  height: auto;
+  text-align: center;
+  position: relative;
+  color: #5f83e7;
+  word-wrap: break-word;
+}
+.note__text {
+  padding: 5px;
+  width: 100%;
+  min-height: 80%;
+  word-wrap: break-word;
+}
+.note__optn {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 30px;
+  display: flex;
+  justify-content: space-around;
+  flex-direction: row;
+  align-items: flex-start;
+}
+.note__btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 20px;
+  position: relative;
+}
+.note__btn--pin {
+  margin: 0;
+  height: 31px;
+  position: absolute;
+  right: 2px;
+  border-radius: 20px;
+  padding: 7px;
+}
+.note__icon {
+  height: 100%;
+  border-radius: 10px;
+}
+.note__icon--pin {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+}
+
+.draggable {
+  border: 1px solid #f5eeee;
+  cursor: move;
+}
+
+.draggable.dragging {
+  opacity: 0.5;
+}/*# sourceMappingURL=noteStyle.css.map */

@@ -8,18 +8,14 @@ body {
   font-family: "Product Sans", Arial, sans-serif;
 }
 
-.no-display {
+.hide {
   display: none !important;
 }
 
-@keyframes bounce {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(-10px);
-  }
+.flex-display {
+  display: flex;
 }
+
 .topmenu {
   display: flex;
   justify-content: space-around;
@@ -28,13 +24,12 @@ body {
   border: 5px solid #272626;
   background: linear-gradient(to right, #272626, #5b5858);
 }
-.topmenu_menu {
+.topmenu__menu {
   position: absolute;
-  height: 40px;
-  width: 40px;
-  top: 3px;
+  top: 8px;
   left: 10px;
   margin: 10px;
+  background-color: #5f83e7;
   border-radius: 50px;
   padding: 5px;
   border: 1px solid #f5eeee;
@@ -45,16 +40,16 @@ body {
   margin: auto;
   border-radius: 30px;
 }
-.topmenu_logo {
+.topmenu__logo {
   margin: 10px;
   height: 40px;
   width: 40px;
 }
-.topmenu_menu-logo {
+.topmenu__menu-logo {
   display: flex;
   justify-content: left;
 }
-.topmenu_keep {
+.topmenu__keep {
   height: 40px;
   width: 40px;
   font-size: 1.5rem;
@@ -66,42 +61,41 @@ body {
   display: inline-block;
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
-.topmenu_keep:hover {
-  animation: bounce 0.6s ease infinite alternate;
+.topmenu__keep:hover {
   opacity: 0.8;
 }
-.topmenu_searchbar {
+.topmenu__searchbar {
   width: auto;
   display: flex;
 }
-.topmenu_bar {
+.topmenu__bar {
+  color: #f1e5e5;
   height: 60%;
   width: 100%;
   margin: 10px;
   padding-left: 10%;
   border-radius: 10px;
-  background: url("https://cdn-icons-png.flaticon.com/512/482/482631.png") no-repeat 10px center;
-  background-size: 16px;
+  background: url("https://cdn-icons-png.flaticon.com/512/482/482631.png") no-repeat 10px;
+  background-size: 20px;
   padding: 10px 50px;
   box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3);
 }
-.topmenu_bar:hover {
+.topmenu__bar:hover {
   border: 2px solid #f5eeee;
   height: 70%;
-  margin: auto;
 }
-.topmenu_bar::-moz-placeholder {
+.topmenu__bar::-moz-placeholder {
   color: #f1e5e5;
 }
-.topmenu_bar::placeholder {
+.topmenu__bar::placeholder {
   color: #f1e5e5;
 }
-.topmenu_optn {
+.topmenu__optn {
   padding: 3px;
   width: 10%;
+  margin: auto;
 }
-.topmenu_optn--refresh {
-  height: 100%;
+.topmenu__optn--refresh {
   width: 100%;
 }
 
@@ -112,6 +106,7 @@ body {
 .leftmenu {
   margin: 0;
   left: 0;
+  height: 100vh;
   width: 15%;
   background-color: #272626;
   border: 2px solid #f5eeee;
@@ -151,7 +146,7 @@ body {
   border-radius: 30px;
   border: 0.5px solid #f5eeee;
   background: url("https://static.vecteezy.com/system/resources/previews/000/357/052/original/vector-notes-icon.jpg") no-repeat 15px center;
-  background-size: 16px;
+  background-size: 25px;
   padding: 10px 50px;
   background-color: #515050;
   box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3);
@@ -197,13 +192,14 @@ body {
 
 /* Popup */
 .popup {
-  display: none;
+  display: block;
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 450px;
-  height: 200px;
+  width: 50%;
+  height: -moz-fit-content;
+  height: fit-content;
   background: white;
   padding: 20px;
   border-radius: 8px;
@@ -211,7 +207,7 @@ body {
   z-index: 1001;
 }
 .popup-overlay {
-  display: none;
+  display: block;
   position: fixed;
   top: 0;
   left: 0;
@@ -222,35 +218,68 @@ body {
 }
 .popup__inner {
   margin: 5px;
+  margin-left: 0;
   padding: 8px;
+  padding-left: 0;
+  height: auto;
+  width: 100%;
 }
 .popup__inner--button {
-  position: absolute;
-  right: 0;
-  bottom: 0;
   margin-left: auto;
-  height: 4em;
-  width: 4em;
+  height: 3em;
+  width: 3em;
+  padding: 0;
+}
+.popup__inner--descrp {
+  height: 50%;
 }
 .popup__input {
-  position: absolute;
-  left: 10px;
+  margin-top: 5%;
   padding: 10px;
   border: 1px solid #ada7a7;
-  width: 80%;
+  width: 100%;
 }
 .popup__input--descrp {
-  position: absolute;
-  top: 100px;
-  left: 10px;
   padding: 10px;
-  width: 80%;
-  height: auto;
+  width: 100%;
+  height: 100%;
   word-wrap: break-word;
+  border: 1px solid #000000;
+}
+.popup__edit {
+  margin-top: 5%;
+  padding: 10px;
+  border: 1px solid #ada7a7;
+  width: 100%;
+}
+.popup__edit--descrp {
+  padding: 10px;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 300px;
+  word-wrap: break-word;
+  border: 1px solid #000000;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  word-wrap: break-word;
+}
+.popup__edit--descrp::-webkit-scrollbar {
+  width: 8px;
+}
+.popup__edit--descrp::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+.popup__edit--descrp::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 .popup__create {
   width: 100%;
   height: 100%;
+}
+.popup__btn {
+  border: none;
 }
 
 .close-btn {
@@ -259,79 +288,4 @@ body {
   right: 15px;
   font-size: 2em;
   cursor: pointer;
-}
-
-.note {
-  height: 200px;
-  max-height: auto;
-  width: 244px;
-  max-width: 300px;
-  background-color: #515050;
-  border: 1px solid #ada7a7;
-  border-radius: 20px;
-  margin: 10px;
-  word-wrap: break-word;
-}
-.note__content {
-  height: 80%;
-}
-.note__title {
-  font-size: 1.4em;
-  font-weight: 800;
-  padding: 0;
-  text-align: center;
-  width: 100%;
-  min-height: 20%;
-  height: auto;
-  text-align: center;
-  position: relative;
-  color: #5f83e7;
-  word-wrap: break-word;
-}
-.note__text {
-  padding: 5px;
-  width: 100%;
-  min-height: 80%;
-  height: auto;
-  word-wrap: break-word;
-}
-.note__optn {
-  width: 100%;
-  height: 30px;
-  display: flex;
-  justify-content: space-around;
-  flex-direction: row;
-  align-items: flex-start;
-}
-.note__btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 20px;
-  position: relative;
-  top: 10px;
-}
-.note__btn--pin {
-  margin: 0;
-  height: 31px;
-  position: absolute;
-  right: 2px;
-  border-radius: 20px;
-}
-.note__icon {
-  height: 100%;
-  border-radius: 10px;
-}
-.note__icon--pin {
-  height: 100%;
-  width: 100%;
-  padding: 0;
-}
-
-.draggable {
-  border: 1px solid #f5eeee;
-  cursor: move;
-}
-
-.draggable.dragging {
-  opacity: 0.5;
 }/*# sourceMappingURL=style.css.map */
