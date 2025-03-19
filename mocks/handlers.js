@@ -1,6 +1,6 @@
 import { http, HttpResponse } from "msw";
 
-export const SERVER_URL = 'http://localhost:5070';
+export const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
 let notes = [];
 

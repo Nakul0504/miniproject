@@ -5,13 +5,9 @@ export function getOfflineNotes() {
     return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEYS.SYNC_QUEUE)) || [];
 }
 
-/**
- * Shows the loading spinner
- */
 export function showSpinner() {
     const spinner = document.getElementById('spinner-overlay');
     if (spinner) {
-        // spinner.style.display = 'flex';
         spinner.classList.add('flex-display');
     }
 }
@@ -19,7 +15,6 @@ export function showSpinner() {
 export function hideSpinner() {
     const spinner = document.getElementById('spinner-overlay');
     if (spinner) {
-        // spinner.style.display = 'none';
         spinner.classList.remove('flex-display');
     }
 }
@@ -33,6 +28,7 @@ export async function addToServer(data) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
+            
 
             if (!response.ok) {
                 throw new Error('Failed to add note');

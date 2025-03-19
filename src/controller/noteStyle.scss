@@ -1,0 +1,89 @@
+$border: #f5eeee;
+$notetitle-textSize: 1.4em;
+$primary-color: #5f83e7;
+$secondary-dark-color: #515050;
+$text-color:#ffffff;
+
+.note {
+    background-color: $secondary-dark-color;
+    border: 1px solid #ada7a7;
+    border-radius: 20px;
+    display: inline-block;
+    height: fit-content;
+    margin: 10px;
+    max-width: 70%;
+    min-height: 200px;
+    min-width: 244px;
+    overflow-wrap: break-word;
+    position: relative;
+    width: fit-content;
+    word-wrap: break-word;
+
+    &__btn {
+        border-radius: 20px;
+        height: 30px;
+        position: relative;
+        width: 30px;
+
+        &--pin {
+            border-radius: 20px;
+            height: 31px;
+            margin: 0;
+            padding: 7px;
+            position: absolute;
+            right: 2px;
+        }
+    }
+
+    &__icon {
+        border-radius: 10px;
+        height: 100%;
+
+        &--pin {
+            height: 100%;
+            padding: 0;
+            width: 100%;
+        }
+    }
+
+    &__optn {
+        align-items: flex-start;
+        bottom: 0;
+        display: flex;
+        flex-direction: row;
+        height: 30px;
+        justify-content: space-around;
+        position: absolute;
+        width: 100%;
+    }
+
+    &__text {
+        min-height: 80%;
+        padding: 5px;
+        width: 100%;
+        word-wrap: break-word;
+        color:$text-color;
+    }
+
+    &__title {
+        color: $primary-color;
+        font-size: $notetitle-textSize;
+        font-weight: 800;
+        height: auto;
+        min-height: 20%;
+        padding: 0;
+        position: relative;
+        text-align: center;
+        width: 100%;
+        word-wrap: break-word;
+    }
+}
+
+.draggable {
+    border: 1px solid $border;
+    cursor: move;
+}
+
+.draggable.dragging {
+    opacity: 0.5;
+}
