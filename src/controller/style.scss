@@ -1,13 +1,14 @@
-$border: #f5eeee;
+$border: #cccccc;
 $closebtn-textSize: 2em;
+$hover-color: #5a38a8fa;
 $keep-textSize: 1.2rem;
 $leftmenu-textSize: 0.7em;
 $notetitle-textSize: 1.4em;
-$primary-color: #5f83e7;
-$primary-dark-color: #272626;
-$secondary-dark-color: #515050;
+$primary-color: #7953d1fa;
+$primary-dark-color: #8161cefa;
+$secondary-dark-color: #f1f0eb;
 $sectionTitle-textSize: 1.7rem;
-$text: #f1e5e5;
+$text: #333333;
 
 * {
     box-sizing: border-box;
@@ -20,11 +21,17 @@ body {
 }
 
 .close-btn {
+    color: #333;
     cursor: pointer;
     font-size: $closebtn-textSize;
     position: absolute;
     right: 15px;
     top: 10px;
+    transition: transform 0.2s ease-in-out;
+
+    &:hover {
+        color: #ff4d4f;
+    }
 }
 
 .content {
@@ -45,13 +52,18 @@ body {
     border-radius: 5px;
     display: flex;
     flex-direction: column;
+    height: calc(100vh - 60px);
     left: 0;
     margin: 0;
+    max-width: 112px;
+    overflow-y: auto;
+    top: 60px;
     width: 12%;
 
     &__optn {
         background-color: $secondary-dark-color;
         border: 0;
+        border-radius: 30px;
         color: $text;
         display: block;
         font-size: $leftmenu-textSize;
@@ -60,35 +72,54 @@ body {
         transition: all 0.11s ease-in-out;
 
         &:hover {
-            border-radius: 30px;
-            color: $primary-color;
+            background-color: $hover-color;
+            color: #ffffff;
             text-shadow: 0px 4px 10px rgba(255, 255, 255, 0.5);
         }
     }
 }
 
 .notes {
-    background-color: $primary-dark-color;
     flex: 1;
 
     &__create {
         height: 15%;
 
         &-bar {
-            background: url('https://static.vecteezy.com/system/resources/previews/000/357/052/original/vector-notes-icon.jpg') no-repeat 15px center;
+            align-items: center;
             background-color: $secondary-dark-color;
-            background-size: 25px;
             border: 0.5px solid $border;
             border-radius: 30px;
             box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3);
+            display: flex;
             left: 25%;
             padding: 10px 50px;
             position: relative;
             top: 40%;
             width: 50%;
 
-            ::placeholder {
+            i {
+                color: $primary-color;
+                font-size: 1.3rem;
+                left: 15px;
+                position: absolute;
+            }
+
+            input.notes__create-input {
+                background: transparent;
+                border: none;
                 color: $text;
+                font-size: 1rem;
+                padding-left: 35px;
+                width: 100%;
+
+                &::placeholder {
+                    color: $text;
+                }
+
+                &:focus {
+                    outline: none;
+                }
             }
         }
     }
@@ -127,9 +158,11 @@ body {
 }
 
 .popup {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease-in-out;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
     display: block;
     height: fit-content;
     left: 50%;
@@ -137,22 +170,17 @@ body {
     position: fixed;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 50%;
+    width: 45%;
     z-index: 1001;
-
-    &-overlay {
-        background: rgba(0, 0, 0, 0.5);
-        display: block;
-        height: 100%;
-        left: 0;
-        position: fixed;
-        top: 0;
-        width: 100%;
-        z-index: 1000;
-    }
 
     &__btn {
         border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        height: 3em;
+        margin-top: 10px;
+        transition: background-color 0.3s ease-in-out, transform 0.2s ease;
+        width: 3em;
     }
 
     &__create {
@@ -160,103 +188,125 @@ body {
         width: 100%;
     }
 
+    &__heading {
+        text-align: center;
+    }
+
+    &__input,
     &__edit {
-        border: 1px solid #ada7a7;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 16px;
         margin-top: 5%;
-        padding: 10px;
+        padding: 12px;
+        transition: box-shadow 0.3s ease-in-out;
         width: 100%;
 
-        &--descrp {
-            border: 1px solid #000000;
-            height: 100%;
-            max-height: 300px;
-            max-width: 100%;
-            overflow-x: hidden;
-            overflow-y: auto !important;
-            padding: 10px;
-            width: 100%;
-            word-wrap: break-word;
+        &:focus {
+            border: 2px solid #000000;
+        }
+    }
 
-            &::-webkit-scrollbar {
-                width: 8px;
-            }
+    &__input--descrp,
+    &__edit--descrp {
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        height: 150px;
+        max-height: 300px;
+        max-width: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding: 12px;
+        width: 100%;
 
-            &::-webkit-scrollbar-thumb {
-                background-color: rgba(0, 0, 0, 0.3);
-                border-radius: 4px;
-            }
+        &::-webkit-scrollbar {
+            width: 8px;
+        }
 
-            &::-webkit-scrollbar-track {
-                background-color: rgba(0, 0, 0, 0.1);
-            }
+        &::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background-color: rgba(0, 0, 0, 0.1);
         }
     }
 
     &__inner {
-        height: auto;
-        margin: 5px;
-        margin-left: 0;
-        padding: 8px;
-        padding-left: 0;
+        margin: 8px 0;
         width: 100%;
 
         &--button {
-            height: 3em;
-            margin-left: auto;
+            display: flex;
+            justify-content: flex-end;
             padding: 0;
-            width: 3em;
-        }
-
-        &--descrp {
-            height: 50%;
-        }
-    }
-
-    &__input {
-        border: 1px solid #ada7a7;
-        margin-top: 5%;
-        padding: 10px;
-        width: 100%;
-
-        &--descrp {
-            border: 1px solid #000000;
-            height: 100%;
-            padding: 10px;
-            width: 100%;
-            word-wrap: break-word;
         }
     }
 }
 
+.popup-overlay {
+    background: rgba(0, 0, 0, 0.5);
+    display: block;
+    height: 100%;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.toast-container {
+    bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: fixed;
+    right: 20px;
+    z-index: 1050;
+}
+
+.toast {
+    animation: fadeInOut 3s ease-in-out;
+    background-color: #333;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #fff;
+    font-size: 0.9rem;
+    opacity: 0;
+    padding: 10px 20px;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+
+    &.error {
+        background-color: #dc3545;
+    }
+
+    &.info {
+        background-color: #17a2b8;
+    }
+
+    &.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    &.success {
+        background-color: #28a745;
+    }
+}
+
 .topmenu {
-    background: linear-gradient(to right, $primary-dark-color, lighten($primary-dark-color, 20%));
+    background-color: $primary-dark-color;
     border: 5px solid $primary-dark-color;
-    border-radius: 20px;
+    border-radius: 10px;
     display: flex;
     height: 4.5rem;
     justify-content: space-around;
 
-    &__bar {
-        background: url('https://cdn-icons-png.flaticon.com/512/482/482631.png') no-repeat 10px;
-        background-size: 20px;
-        box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3);
-        color: $text;
-        height: 3rem;
-        margin: 10px;
-        padding: 0.1rem 0.1rem;
-        padding-left: 2.5rem;
-        border-radius: 10px;
-
-        &:hover {
-            border: 2px solid $border;
-        }
-
-        &::placeholder {
-            color: $text;
-        }
-    }
-
     &__btn {
+        border: none;
         border-radius: 30px;
         height: 1.875rem;
         margin: auto;
@@ -264,7 +314,7 @@ body {
     }
 
     &__keep {
-        color: $text;
+        color: #ffffff;
         display: inline-block;
         font-size: $keep-textSize;
         font-weight: 500;
@@ -272,8 +322,7 @@ body {
         position: relative;
         text-shadow: 0px 4px 10px rgba(255, 255, 255, 0.5);
         top: 30%;
-        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-        width: 40px;
+        transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
 
         &:hover {
             opacity: 0.8;
@@ -289,11 +338,13 @@ body {
     &__menu {
         border: 1px solid $border;
         border-radius: 50px;
+        height: 40px;
         left: 10px;
         margin: 10px;
         padding: 5px;
         position: absolute;
         top: 8px;
+        width: 40px;
     }
 
     &__menu-logo {
@@ -307,6 +358,7 @@ body {
         width: 10%;
 
         &--refresh {
+            border: none;
             width: 100%;
         }
     }
@@ -314,6 +366,70 @@ body {
     &__searchbar {
         display: flex;
         width: auto;
+    }
+
+    &__search-wrapper {
+        align-items: center;
+        background-color: $secondary-dark-color;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(255, 255, 255, 0.3);
+        display: flex;
+        margin: 10px;
+        padding: 5px 10px;
+        position: relative;
+
+        i {
+            color: $text;
+            font-size: 1rem;
+            left: 12px;
+            position: absolute;
+        }
+
+        input {
+            background-color: transparent;
+            border: none;
+            border-radius: 10px;
+            color: $text;
+            padding: 8px 8px 8px 30px;
+            width: 100%;
+
+            &::placeholder {
+                color: $text;
+            }
+
+            &:focus {
+                outline: none;
+            }
+        }
+    }
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    10%,
+    90% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(20px);
     }
 }
 

@@ -9,7 +9,7 @@ const noteTitle = document.getElementById('notetitle');
 const notedescrp = document.getElementById('notedescription');
 const editPoppup = document.getElementById('popupContainer-edit');
 const notesTitlePinned = document.querySelector('.notes__title--pinned');
-const notesTitle = document.querySelector('.notes__title');
+const notesTitle = document.querySelector('.notes__title--notes');
 const notesLayout = document.querySelector('.notes__layout');
 const notesPinned = document.querySelector('.notes__pinned');
 const topMenuBar = document.querySelector('.topmenu__bar');
@@ -28,6 +28,17 @@ function closePopup() {
     notedescrp.value = '';
     editPoppup.classList.add('hide');
 }
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type} show`;
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
 export async function createNoteButton(event) {
     try {
         const title = noteTitle.value.trim();
@@ -36,7 +47,7 @@ export async function createNoteButton(event) {
         notedescrp.value = '';
 
         if (title === '' && description === '') {
-            alert('! At least provide either Title or Description');
+            showToast('Please provide either a title or description!', 'error');
             return;
         }
         await addToServer({
@@ -47,13 +58,12 @@ export async function createNoteButton(event) {
         });
         await renderNotes();
         closePopup();
-
+        showToast('Note created successfully!', 'success');
     } catch (error) {
         console.error('Error in createNoteButton:', error);
-        alert('An error occurred while creating the note. Please try again.');
+        showToast('An error occurred while creating the note. Please try again.', 'error');
     }
 }
-
 export async function doRefresh() {
     if (notesTitlePinned) {
         notesTitlePinned.classList.add('hide');
@@ -125,17 +135,15 @@ export async function renderNotes() {
                 deleteBtn.innerHTML = '<i class="fa fa-trash" aria-hidden="true"></i>';
 
                 const editBtn = document.createElement('button');
-                editBtn.classList.add('note__btn');
+                editBtn.classList.add('note__btn', 'note__edit-btn');
                 editBtn.setAttribute('data-id', note.id);
                 editBtn.setAttribute('title', 'Edit note');
-
-                // Edit Icon
                 editBtn.innerHTML = '<i class="fa fa-pencil" aria-hidden="true"></i>';
                 editBtn.onclick = () => callingEdit(note.id);
 
                 // View Button
                 const viewBtn = document.createElement('button');
-                viewBtn.classList.add('note__btn');
+                viewBtn.classList.add('note__btn', 'note__view-btn');
                 viewBtn.setAttribute('data-id', note.id);
                 viewBtn.setAttribute('title', 'View note');
 
@@ -169,9 +177,12 @@ export async function renderNotes() {
             notesTitle.classList.add('hide');
         }
         notesContainer.addEventListener('click', async (event) => {
-            if (event.target.closest('.note__delete-btn')) {
-                await deleteNoteButton(event);
-            }
+            const deleteBtn = event.target.closest('.note__delete-btn');
+            if (!deleteBtn) return;
+            const isInTrash = deleteBtn.closest('.notes__trash');
+            if (isInTrash) return;
+
+            await deleteNoteButton(event);
         });
         dragAndDrop();
     } catch (error) {
@@ -265,12 +276,12 @@ async function callingPin(noteId) {
     if (noteDetail.isPinned === false) {
         if (noteToBePinned && pinnedContainer && layoutContainer) {
             if (pinnedContainer.childElementCount == 0) {
-                document.querySelector('.notes__title').classList.remove('hide');
-                document.querySelector('.notes__title--pinned').classList.remove('hide');
+                notesTitle.classList.remove('hide');
+                notesTitlePinned.classList.remove('hide');
             }
             if (layoutContainer.childElementCount == 1) {
-                document.querySelector('.notes__title').classList.add('hide');
-                document.querySelector('.notes__title--pinned').classList.remove('hide');
+                notesTitle.classList.add('hide');
+                notesTitlePinned.classList.remove('hide');
             }
             patchToServer(noteId, { 'isPinned': true });
             document.querySelector('.notes__pinned').classList.remove('hide');
@@ -282,11 +293,11 @@ async function callingPin(noteId) {
     else {
         if (noteToBePinned && pinnedContainer && layoutContainer) {
             if (layoutContainer.childElementCount == 0) {
-                document.querySelector('.notes__title').classList.remove('hide');
+                notesTitle.classList.remove('hide');
             }
             if (pinnedContainer.childElementCount == 1) {
-                document.querySelector('.notes__title--pinned').classList.add('hide');
-                document.querySelector('.notes__title').classList.add('hide');
+                notesTitlePinned.classList.add('hide');
+                notesTitle.classList.add('hide');
             }
             patchToServer(noteId, { 'isPinned': false });
             document.querySelector('.notes__layout').classList.remove('hide');
@@ -299,6 +310,7 @@ async function callingPin(noteId) {
 }
 
 export function callingEdit(noteId) {
+    popupOverlay.classList.remove('hide');
     const noteElement = document.getElementById(noteId);
     const popupContainer = document.getElementById("popupContainer-edit");
     document.getElementById("notetitle-edit").value = noteElement.querySelector(".note__title").textContent;
@@ -308,7 +320,8 @@ export function callingEdit(noteId) {
     popupContainer.classList.remove('hide');
     const closeBtn = popupContainer.querySelector(".close-btn");
     closeBtn.onclick = () => {
-        popupContainer.classList.add('hide')
+        popupContainer.classList.add('hide');
+        popupOverlay.classList.add('hide');
     };
     document.getElementById("editNoteButton").onclick = editNoteButton;
 }
@@ -318,14 +331,20 @@ export async function editNoteButton(event) {
     const description = quillInstance.root.innerHTML.trim();
 
     if (title === "" && description === "") {
-        alert("At least provide either Title or Description!");
+        showToast("Please provide either a title or description!", "error");
         return;
     }
 
     const noteId = event.target.closest(".popup").getAttribute("data-id");
-    await patchToServer(noteId, { id: noteId, title: title, text: description });
-    await renderNotes();
-    closePopup();
+    try {
+        await patchToServer(noteId, { id: noteId, title: title, text: description });
+        await renderNotes();
+        closePopup();
+        showToast("Note updated successfully!", "success");
+    } catch (error) {
+        console.error("Error in editNoteButton:", error);
+        showToast("An error occurred while updating the note. Please try again.", "error");
+    }
 }
 
 export async function deleteNoteButton(event) {
@@ -337,7 +356,6 @@ export async function deleteNoteButton(event) {
     if (!deleteBtn) return;
 
     const noteId = deleteBtn.getAttribute('data-id');
-
     const noteElement = document.getElementById(noteId);
     if (!noteElement) {
         console.error('Error: Note element not found!');
@@ -345,34 +363,40 @@ export async function deleteNoteButton(event) {
     }
     const title = noteElement.querySelector('.note__title').textContent;
     const text = noteElement.querySelector('.note__text').textContent;
-    if (!confirm(`Are you sure to delete the Note with Title:${title} ?`)) {
+
+    if (!confirm(`Are you sure to delete the Note with Title: ${title}?`)) {
         return;
     }
     try {
-        patchToServer(noteId, { 'id': noteId, 'title': title, 'text': text, 'isPinned': false, 'isDeleted': true });
-        const resp = await getFromServer();
+        await patchToServer(noteId, { id: noteId, title: title, text: text, isPinned: false, isDeleted: true });
         await renderNotes();
+        showToast('Note deleted successfully!', 'success');
     } catch (error) {
         console.error('Error in deleteNoteButton:', error);
+        showToast('An error occurred while deleting the note. Please try again.', 'error');
     } finally {
         delete event.target.dataset.processing;
     }
 }
 function callingView(noteId) {
+    popupOverlay.classList.remove('hide');
     const noteElement = document.getElementById(noteId);
+    const title = document.getElementById('notetitle-edit');
+    const descrp = document.getElementById('notedescription-edit');
     const popupContainer = editPoppup;
-    document.getElementById('notetitle-edit').value = noteElement.querySelector('.note__title').textContent;
-    document.getElementById('notedescription-edit').value = noteElement.querySelector('.note__text').textContent;
-    document.getElementById('notetitle-edit').setAttribute('readonly', true);
-    document.getElementById('notedescription-edit').setAttribute('readonly', true);
+    title.value = noteElement.querySelector('.note__title').textContent;
+    descrp.value = noteElement.querySelector('.note__text').textContent;
+    title.setAttribute('readonly', true);
+    descrp.setAttribute('readonly', true);
     document.getElementById('editNoteButton').classList.add('hide');
     popupContainer.setAttribute('data-id', noteId);
     popupContainer.classList.remove('hide');
     const closeBtn = popupContainer.querySelector('.close-btn');
     closeBtn.addEventListener('click', () => {
         popupContainer.classList.add('hide');
-        document.getElementById('notetitle-edit').removeAttribute('readonly');
-        document.getElementById('notedescription-edit').removeAttribute('readonly');
+        title.removeAttribute('readonly');
+        descrp.removeAttribute('readonly');
         document.getElementById('editNoteButton').classList.remove('hide');
+        popupOverlay.classList.add('hide');
     });
 }

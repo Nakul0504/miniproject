@@ -14,7 +14,7 @@ async function renderTrashNotes() {
             if (note.isDeleted === true) {
                 const noteDiv = document.createElement('div');
                 noteDiv.classList.add('note');
-                noteDiv.setAttribute('id', note.id); // Assign note ID
+                noteDiv.setAttribute('id', note.id);
 
                 // Content Container
                 const noteContent = document.createElement('div');
@@ -44,27 +44,15 @@ async function renderTrashNotes() {
                 deleteBtn.setAttribute('title', 'Delete note');
                 deleteBtn.classList.add('note__btn', 'note__delete-btn');
 
-                // Delete Icon
-                const deleteIcon = document.createElement('img');
-                deleteIcon.setAttribute('class', 'note__icon');
-                deleteIcon.setAttribute('src', 'https://th.bing.com/th/id/OIP.9CtMaGywq5uFGv1C6P6k1wHaHa?rs=1&pid=ImgDetMain');
-                deleteIcon.setAttribute('alt', 'Delete');
-
-                deleteBtn.appendChild(deleteIcon);
+                deleteBtn.innerHTML = '<i class="fa fa-trash" aria-hidden="true"></i>';
+                deleteBtn.onclick = () => deleteTrashNoteButton(note.id, note.title);
 
                 // Undo Button
                 const undoBtn = document.createElement('button');
                 undoBtn.setAttribute('data-id', note.id);
                 undoBtn.setAttribute('title', 'restore note');
                 undoBtn.classList.add('note__btn', 'note__restore-btn');
-
-                // Undo Icon
-                const undoIcon = document.createElement('img');
-                undoIcon.setAttribute('class', 'note__icon');
-                undoIcon.setAttribute('src', 'https://img.icons8.com/?size=100&id=91644&format=png&color=000000');
-                undoIcon.setAttribute('alt', 'Restore');
-
-                undoBtn.appendChild(undoIcon);
+                undoBtn.innerHTML = '<i class="fa fa-undo" aria-hidden="true"></i>';
                 undoBtn.onclick = () => callingRestore(note.id, note.title);
 
                 // View Button
@@ -72,13 +60,8 @@ async function renderTrashNotes() {
                 viewBtn.classList.add('note__btn');
                 viewBtn.setAttribute('data-id', note.id);
                 viewBtn.setAttribute('title', 'View note');
+                viewBtn.innerHTML = '<i class="fa fa-expand" aria-hidden="true"></i>';
 
-                // View Icon
-                const viewIcon = document.createElement('img');
-                viewIcon.setAttribute('class', 'note__icon');
-                viewIcon.setAttribute('src', 'https://icon-library.com/images/full-screen-icon-png/full-screen-icon-png-17.jpg');
-                viewIcon.setAttribute('alt', 'View');
-                viewBtn.appendChild(viewIcon);
                 viewBtn.onclick = () => callingView(note.id);
 
                 optnDiv.classList.add('flex-display');
@@ -91,32 +74,26 @@ async function renderTrashNotes() {
             }
         });
 
-        parent.addEventListener('click', async (event) => {
-            if (event.target.closest('.note__delete-btn')) {
-                await deleteNoteButton(event);
-            }
-        });
-
     } catch (error) {
         console.error('Error fetching notes:', error);
     }
 }
-
-export async function deleteNoteButton(event) {
-    const deleteBtn = event.target.closest('.note__delete-btn');
-    if (!deleteBtn) return;
-    const noteId = deleteBtn.getAttribute('data-id');
-
+export async function deleteTrashNoteButton(noteId, title) {
     const noteElement = document.getElementById(noteId);
-    const title = noteElement.querySelector('.note__title').textContent;
-    const text = noteElement.querySelector('.note__text').textContent;
-    var retVal = confirm(`Do you want to permenantly delete ${title} ?`);
-    if (retVal == true) {
-        await deleteFromServer(noteId);
+    const retVal = confirm(`Do you want to permanently delete ${title}?`);
+    if (retVal === true) {
+        try {
+            await deleteFromServer(noteId);
+            await renderTrashNotes();
+            showToast(`Note "${title}" permanently deleted!`, 'success');
+        } catch (error) {
+            console.error('Error deleting note:', error);
+            showToast('An error occurred while deleting the note. Please try again.', 'error');
+        }
     } else {
+        showToast(`Deletion of note "${title}" canceled.`, 'info');
         return;
     }
-    await renderTrashNotes();
 }
 
 function callingView(noteId) {
@@ -146,11 +123,29 @@ function callingView(noteId) {
 function callingRestore(noteId, title) {
     const element = document.getElementById(noteId);
     const notesLayout = document.querySelector('.notes__layout');
-    var retVal = confirm(`Do you want to restore ${title} ?`);
-    if (retVal == true) {
-        notesLayout.appendChild(element);
-        patchToServer(noteId, { 'isDeleted': false });
+    const retVal = confirm(`Do you want to restore "${title}"?`);
+    if (retVal === true) {
+        try {
+            notesLayout.appendChild(element);
+            patchToServer(noteId, { isDeleted: false });
+            showToast(`Note "${title}" restored successfully!`, 'success');
+        } catch (error) {
+            console.error('Error restoring note:', error);
+            showToast('An error occurred while restoring the note. Please try again.', 'error');
+        }
     } else {
+        showToast(`Restoration of note "${title}" canceled.`, 'info');
         return;
     }
+}
+function showToast(message, type = 'info') {
+    const toastContainer = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type} show`;
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }

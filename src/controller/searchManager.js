@@ -1,17 +1,34 @@
-let debounceTimeout;
-export default async function debounceSearch(query) {
+let throttleTimeout = false;
+let lastExecutionTime = 0;
+const throttleDelay = 500;
+
+export default async function throttleSearch(query) {
     const pinDiv = document.querySelector('.notes__pinned');
     const noteDiv = document.querySelector('.notes__layout');
     const pinChildDivs = pinDiv.querySelectorAll('div');
     const noteChildDivs = noteDiv.querySelectorAll('div');
 
     const noteIds = initialWork(pinChildDivs, noteChildDivs);
-    clearTimeout(debounceTimeout); // Clear previous timeout
 
-    debounceTimeout = setTimeout(() => {
-        const results = noteIds.filter(id => filterNote(query, id));
-        filterNoteDisplay(results);
-    }, 500);
+    const currentTime = Date.now();
+    if (throttleTimeout) return;
+
+    if (currentTime - lastExecutionTime >= throttleDelay) {
+        executeSearch(query, noteIds);
+        lastExecutionTime = currentTime;
+    } else {
+        throttleTimeout = true;
+        setTimeout(() => {
+            executeSearch(query, noteIds);
+            lastExecutionTime = Date.now();
+            throttleTimeout = false;
+        }, throttleDelay - (currentTime - lastExecutionTime));
+    }
+}
+
+function executeSearch(query, noteIds) {
+    const results = noteIds.filter(id => filterNote(query, id));
+    filterNoteDisplay(results);
 }
 
 function filterNote(query, id) {
@@ -47,5 +64,3 @@ function filterNoteDisplay(notesid) {
         note.classList.remove('hide');
     });
 }
-
-

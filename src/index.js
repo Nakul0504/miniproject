@@ -1,7 +1,7 @@
 import { SERVER_URL } from '../mocks/handlers';
 import { worker } from '../mocks/server.js';
 import { createNote, createNoteButton, doRefresh, renderNotes, dragAndDrop } from './controller/crud.js';
-import debounceSearch from './controller/searchManager.js';
+import throttleSearch from './controller/searchManager.js';
 import syncNotesToServer from './model/syncFunctionality.js';
 import { initialize } from './controller/trash.js';
 
@@ -32,21 +32,33 @@ const refreshButton = document.getElementById('refresh');
 const notesCreate = document.querySelector('.notes__create');
 const notesTitlePinned = document.querySelector('.notes__title--pinned');
 const notesPinned = document.querySelector('.notes__pinned');
-const notesTitle = document.querySelector('.notes__title');
+const notesTitle = document.querySelector('.notes__title--notes');
 const notesLayout = document.querySelector('.notes__layout');
 const notesTitleTrash = document.querySelector('.notes__title--trash');
 const notesTrash = document.querySelector('.notes__trash');
+const leftmenubtn = document.querySelector('.topmenu__menu');
+const leftmenu = document.querySelector('.leftmenu');
+let leftmenuVisible = false;
 localStorage.setItem('syncQueue', JSON.stringify([]));
 
-// notesSection.addEventListener('click', () => noteSectionInitialization());
-// trashSection.addEventListener('click', () => trashSectionInitialization());
+notesSection.addEventListener('click', () => noteSectionInitialization());
+trashSection.addEventListener('click', () => trashSectionInitialization());
+
+leftmenubtn.addEventListener('click', () => {
+    leftmenuVisible = !leftmenuVisible;
+    if (leftmenuVisible) {
+        leftmenu.classList.remove('hide');
+    } else {
+        leftmenu.classList.add('hide');
+    }
+});
 notesSection.onclick = noteSectionInitialization;
 trashSection.onclick = trashSectionInitialization;
 
 async function crudInitializer() {
     createNoteButtonElement.addEventListener('click', createNote);
     createNoteBtn.addEventListener('click', createNoteButton);
-    topMenuBar.addEventListener('input', (event) => debounceSearch(event.target.value));
+    topMenuBar.addEventListener('input', (event) => throttleSearch(event.target.value));
     refreshButton.addEventListener('click', doRefresh);
     noteUI();
 }

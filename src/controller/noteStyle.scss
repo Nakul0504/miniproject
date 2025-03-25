@@ -1,13 +1,22 @@
-$border: #f5eeee;
+$border: #070707;
 $notetitle-textSize: 1.4em;
-$primary-color: #5f83e7;
-$secondary-dark-color: #515050;
-$text-color:#ffffff;
+$primary-color: #f5f8f8;
+$secondary-dark-color: #ffffff;
+$text-color: #7953d1fa;
+
+.draggable {
+    cursor: move;
+}
+
+.draggable.dragging {
+    opacity: 0.5;
+}
 
 .note {
     background-color: $secondary-dark-color;
-    border: 1px solid #ada7a7;
+    box-shadow: 0px 4px 10px rgba(3, 3, 3, 0.5);
     border-radius: 20px;
+    color: $text-color;
     display: inline-block;
     height: fit-content;
     margin: 10px;
@@ -15,6 +24,7 @@ $text-color:#ffffff;
     min-height: 200px;
     min-width: 244px;
     overflow-wrap: break-word;
+    padding: 10px;
     position: relative;
     width: fit-content;
     word-wrap: break-word;
@@ -24,6 +34,11 @@ $text-color:#ffffff;
         height: 30px;
         position: relative;
         width: 30px;
+        border: none;
+
+        :hover {
+            color: #929997;
+        }
 
         &--pin {
             border-radius: 20px;
@@ -32,6 +47,23 @@ $text-color:#ffffff;
             padding: 7px;
             position: absolute;
             right: 2px;
+            border: none;
+
+            :hover {
+                color: #929997;
+            }
+        }
+    }
+
+    &__delete-btn {
+        :hover {
+            color: #f80d0d;
+        }
+    }
+
+    &__edit-btn {
+        :hover {
+            color: #5717ec;
         }
     }
 
@@ -62,11 +94,9 @@ $text-color:#ffffff;
         padding: 5px;
         width: 100%;
         word-wrap: break-word;
-        color:$text-color;
     }
 
     &__title {
-        color: $primary-color;
         font-size: $notetitle-textSize;
         font-weight: 800;
         height: auto;
@@ -77,13 +107,10 @@ $text-color:#ffffff;
         width: 100%;
         word-wrap: break-word;
     }
-}
 
-.draggable {
-    border: 1px solid $border;
-    cursor: move;
-}
-
-.draggable.dragging {
-    opacity: 0.5;
+    &__view-btn {
+        :hover {
+            color: #4ddb3a;
+        }
+    }
 }
